@@ -22,7 +22,7 @@
 ## 进度
 
 - [x] v0.1 · 步骤 0：仓库骨架
-- [ ] v0.1 · 步骤 1：立 `sessions.md` 输入契约 ＋ 样本
+- [x] v0.1 · 步骤 1：立 `sessions.md` 输入契约 ＋ 样本
 - [ ] v0.1 · 步骤 2：`parse_sessions.py` 解析器（parse 段）
 - [ ] v0.1 · aggregate 段
 - [ ] v0.1 · render 段
