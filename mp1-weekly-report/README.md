@@ -8,7 +8,7 @@
 
 ## 输入 / 输出
 
-- 输入：`learning-log/sessions.md`（会话日志，一行一条：`日期 | 周次 | 时长h | 主题`）
+- 输入：`learning-log/sessions.md`（会话日志，一行一条：`日期 | 周次 | 时长h | 主题`；相对本目录为 `../../learning-log/sessions.md`）
 - 输出：markdown 周报（计划写入 `learning-log/weeks/`）
 
 ## 架构（三段式流水线）

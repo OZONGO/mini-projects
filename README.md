@@ -18,4 +18,4 @@
 ## 数据来源
 
 MP1 的输入是学习记录仓库 `learning-log` 里的会话日志 `sessions.md`
-（本地相对路径 `../learning-log/sessions.md`）。
+（本目录位于 `L/mini-projects/`，故相对路径为 `../../learning-log/sessions.md`）。
