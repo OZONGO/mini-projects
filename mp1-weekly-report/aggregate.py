@@ -1,40 +1,54 @@
-"""MP1 · 学习周报生成器 —— 聚合段（v0.2 步骤 3）
+"""MP1 · 学习周报生成器 —— 聚合段（v0.3 步骤 4）
 
 ## DoD（先写验收条件，再写代码）
-- 吃 parse_sessions 交回的 (rows, problems)：坏行打印出来，绝不沉默
-- 输出两张账：按周合计（W0→W28 真周序）、按类别合计（总额降序）
-- 两本账由同一个分组函数吃掉——只有"取哪个字段当键"不同（同构）
-- 周次排序用自造的尺子按数字比，不信字典序（W10 排在 W2 前是毒）
-- 类别账显著标注口径偏差（TD-1：category 记产出类型、hours 记学习时间，
-  教练代做劳动产出"文档"却不计入 hours，按类别分布天然偏高——方案 a 拍板）
-- 浮点求和有显示噪声（0.1+0.2 家族），报表数字一律 :.1f 收口
-- 聚合只读不改：不动 sessions.md，不动解析结果
+- build_report(rows, problems) 只算账、排序、判事实，return 结构化 report；
+  不 print、不碰文件、不拼展示文案。
+- report 结构契约（顺序由 aggregate 定，render 不得再排序）：
+    {
+      "total_hours": float,
+      "record_count": int,
+      "week_items": list[tuple[str, float]],      # 已按 week_no 数字升序：W0→W28
+      "category_items": list[tuple[str, float]],  # 已按 hours 降序，同分保持稳定
+      "problems": list[dict],                     # 原样带 lineno/reason
+      "td1_bias": bool,                           # True=存在 TD-1 口径偏差这一事实
+    }
+- 坏行不沉默：problems 原样交 render 展示，aggregate 不打印。
+- 周序用 week_no 数字尺子，不信字典序（W10 不能排在 W2 前）。
+- 浮点报表数字由 render 用 :.1f 收口；aggregate 不拼文案。
+- 聚合只读不改：不动 sessions.md，不动解析结果。
+- 本模块是库，不是入口：全链路 CLI 唯一入口在 render.py。
+  这样串联代码与硬编码路径只存在一份，改路径/改链路只改一处。
 
-## 运行
-    cd mini-projects/mp1-weekly-report && python aggregate.py
-    （相对路径从【当前工作目录】起算，必须在这个目录里跑）
+## 预测注释
+- render_markdown(report) 最终 md 形状：
+  - 标题、合计：合计: X.Xh ／ N 条记录
+  - 坏行有则出现在前部，无则省略
+  - 按周合计：W0, W1, W2, ... W10 在 W2 后；每行 X.Xh
+  - 按类别合计：⚠ TD-1 事实说明；类别按 hours 降序；每行 X.Xh
+- 数字以运行时 sessions.md 为准，不写死。
 """
 
-from parse_sessions import parse_sessions
+
+
+# --- TD-1 口径偏差事实开关 ---------------------------------------------
+# v0.2：TD-1 已确认存在——category 记产出类型、hours 记学习时间，
+#       含教练代做劳动的行不计入 hours，类别分布天然偏高。
+# v3 真修 TD-1 时：改这一行为 False（或改为从数据推导，比如扫描
+#       是否存在带“教练代做”标记的行）。改这一行，别处不用翻。
+TD1_BIAS_ACTIVE = True
 
 
 def group_sum(rows, key):
-    """分组聚合：按 key(row) 分组、组内累加 hours，返回 {组名: 合计}。
-
-    按周/按类别两本账骨架相同，唯一可变点是分组键——抽成参数（尺子）。
-    """
+    """分组聚合：按 key(row) 分组、组内累加 hours，返回 {组名: 合计}。"""
     totals = {}
     for row in rows:
-        k = key(row)                          # 调用递进来的尺子：这条归哪个组
-        totals[k] = totals.get(k, 0) + row["hours"]   # word_freq3 的 get 累加，原样搬家
+        k = key(row)
+        totals[k] = totals.get(k, 0) + row["hours"]
     return totals
 
 
 def week_no(label):
-    """周次排序尺子："W10" → 10。
-
-    敢直接 int() 是因为解析段保证字面规范（W+无前导零 ASCII 数字）。
-    """
+    """周次排序尺子："W10" → 10。"""
     return int(label[1:])
 
 
@@ -46,29 +60,34 @@ def by_category(row):
     return row["category"]
 
 
-def main():
-    rows, problems = parse_sessions("../../learning-log/sessions.md")
+def build_report(rows, problems):
+    """算账、排序、判事实，return 结构化 report。不 print。"""
+    week_totals = group_sum(rows, key=by_week)
+    category_totals = group_sum(rows, key=by_category)
 
-    if problems:                              # 坏行不沉默：上一段记的行号到这儿必须交出来
-        print(f"== 坏行 {len(problems)} 条（已隔离，不计入聚合）==")
-        for p in problems:
-            print(f"  第 {p['lineno']} 行：{p['reason']}")
+    week_items = sorted(
+        week_totals.items(),
+        key=lambda item: week_no(item[0]),
+    )
 
-    week_totals = group_sum(rows, key=by_week)          # 尺子①：按周
-    category_totals = group_sum(rows, key=by_category)  # 尺子②：按类别——函数没换
+    category_items = sorted(
+        category_totals.items(),
+        key=lambda item: item[1],
+        reverse=True,
+    )
 
-    print("\n== 按周合计 ==")
-    for w in sorted(week_totals, key=week_no):        # 命名尺子：def 出来的那种
-        print(f"  {w}: {week_totals[w]:.1f}h")
-
-    print("\n== 按类别合计 ==")
-    print("  ⚠ 口径偏差（TD-1）：category 记产出、hours 记学习时间，")
-    print("    含教练代做劳动的行，本分布天然偏高（契约 v3 时再修）。")
-    for c in sorted(category_totals, key=lambda k: category_totals[k], reverse=True):
-        print(f"  {c}: {category_totals[c]:.1f}h")    # 行内尺子：lambda 那种，两种都给你看
-
-    print(f"\n合计: {sum(row['hours'] for row in rows):.1f}h ／ {len(rows)} 条记录")
+    return {
+        "total_hours": sum(row["hours"] for row in rows),
+        "record_count": len(rows),
+        "week_items": week_items,
+        "category_items": category_items,
+        "problems": problems,
+        "td1_bias": TD1_BIAS_ACTIVE,   # 判断来自上面那个命名常量，不是内联字面量
+    }
 
 
-if __name__ == "__main__": 
-    main()
+# 本文件不提供 __main__：全链路入口只在 render.py。
+# 如果要在开发时快速看聚合中间结果，用：
+#   python -c "from parse_sessions import parse_sessions; \
+#              from aggregate import build_report; \
+#              print(build_report(*parse_sessions('../../learning-log/sessions.md')))"
