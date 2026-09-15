@@ -29,6 +29,7 @@
 - [x] v0.1 · 步骤 3：`aggregate.py` 聚合段——同构 `group_sum` 一函数吃两本账；`week_no` 尺子按数字排周序（字典序毒已解）；TD-1 口径偏差显著入输出（方案 a，`actor` 留 v3）
 - [x] v0.1 · 步骤 4：`render.py` 渲染段——`render_markdown(report)` 纯函数（零 print／零路径／零 sum／零排序）；`report` 契约把顺序物化进 `list[tuple]`，render 不得再排序；数字一律 `:.1f` 收口；TD-1「事实归 aggregate、措辞归 render」（`td1_bias` 开关）；三段式流水线打通
 - [x] v0.1 · 步骤 4.5：`test_render.py` 测试固化（8 用例，守住渲染段五条契约）——纯函数的夹具就是一个**手写的 report dict**，比解析段的 `tempfile` 轻一个数量级；`make_report(**overrides)` 工厂的 base 顺序**刻意与契约相反**（周次 W10 在前、类别升序），否则"排对了"与"没排序"在观测上无法区分；**测试绝不读真 `sessions.md`**
+- [x] v0.1 · 步骤 4.6：`test_aggregate.py` 测试固化（9 用例，守住聚合段八条契约：合计／条数／周序数字尺子／类别降序／同分稳定／problems 原样／td1_bias 来自常量／只读不改）——夹具是**手写的 rows dict**；**变异实测三组**（①删 `key=week_no` 尺子 ②类别排序键从时长换成组名 ③降序改写成"升序再整体翻转"）各自**只打掉对应那一条**测试，其余 8 条全绿＝"一测一守"。**本步最值钱的发现是"沉默型变异"**：真数据只有 W1/W2（字典序＝数字序）且类别无同分，①②③里有两处同时生效时 `render.py` 的输出**一个字都不会变**——变异测试的价值不在"改坏了会红"，而在"改坏了外面看不出来时，只有反向夹具能看见它"
 - [ ] v1.0：`ReportGenerator` 类 ＋ CLI 参数（`--week 2026-W40`）＋ JSON 导出 ＋ 3 个测试
 
 ## 怎么用
@@ -45,6 +46,7 @@ python parse_sessions.py
 # 跑测试（改任何校验规则或排版契约后都该跑一遍）
 python test_parse_sessions.py
 python test_render.py
+python test_aggregate.py
 
 # 只想看聚合中间结果——aggregate 已退回纯库，不再是入口：
 python -c "from parse_sessions import parse_sessions; from aggregate import build_report; print(build_report(*parse_sessions('../../learning-log/sessions.md')))"
