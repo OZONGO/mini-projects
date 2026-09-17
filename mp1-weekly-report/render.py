@@ -1,3 +1,4 @@
+#render.py
 """MP1 · 学习周报生成器 —— 渲染段（v0.3 步骤 4）
 
 ## DoD
@@ -42,7 +43,7 @@ def render_markdown(report):
     if problems:
         lines.append(f"## 坏行（{len(problems)} 条，已隔离，不计入聚合）")
         for p in problems:
-            lines.append(f"  第 {p['lineno']} 行：{p['reason']}")
+            lines.append(f"-  第 {p['lineno']} 行：{p['reason']}")
         lines.append("")
 
     lines.append("## 按周合计")
