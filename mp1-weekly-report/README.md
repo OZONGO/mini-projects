@@ -25,7 +25,7 @@
 - [x] v0.1 · 步骤 1：立 `sessions.md` 输入契约 ＋ 样本
 - [x] v0.1 · 步骤 2：`parse_sessions.py` 解析器（parse 段）——三类检查：段数 → 非空 → 值域（周次／类别／时长）
 - [x] v0.1 · 步骤 2.5：契约 v1 → v2，新增受控字段 `类别`（词表 5 值，解析器拒绝词表外的值）
-- [x] v0.1 · 步骤 2.6：`test_parse_sessions.py` 测试固化（23 用例，把九条手工探针变成一条命令）
+- [x] v0.1 · 步骤 2.6：`test_parse_sessions.py` 测试固化（24 用例，把九条手工探针变成一条命令）
 - [x] v0.1 · 步骤 3：`aggregate.py` 聚合段——同构 `group_sum` 一函数吃两本账；`week_no` 尺子按数字排周序（字典序毒已解）；TD-1 口径偏差显著入输出（方案 a，`actor` 留 v3）
 - [x] v0.1 · 步骤 4：`render.py` 渲染段——`render_markdown(report)` 纯函数（零 print／零路径／零 sum／零排序）；`report` 契约把顺序物化进 `list[tuple]`，render 不得再排序；数字一律 `:.1f` 收口；TD-1「事实归 aggregate、措辞归 render」（`td1_bias` 开关）；三段式流水线打通
 - [x] v0.1 · 步骤 4.5：`test_render.py` 测试固化（8 用例，守住渲染段五条契约）——纯函数的夹具就是一个**手写的 report dict**，比解析段的 `tempfile` 轻一个数量级；`make_report(**overrides)` 工厂的 base 顺序**刻意与契约相反**（周次 W10 在前、类别升序），否则"排对了"与"没排序"在观测上无法区分；**测试绝不读真 `sessions.md`**
