@@ -1,3 +1,4 @@
+#parse_sessions.py
 """MP1 · 学习周报生成器 —— 解析段（v0.1 步骤 2 ＋ 契约 v2）
 
 > 测试：同目录 `test_parse_sessions.py`（`python test_parse_sessions.py`，23 个用例）。

@@ -1,5 +1,5 @@
 #render.py
-"""MP1 · 学习周报生成器 —— 渲染段（v0.3 步骤 4）
+"""MP1 · 学习周报生成器 —— 渲染段（v0.1 步骤 4）
 
 ## DoD
 - render_markdown(report) 纯函数：吃结构化 report，return 完整 markdown 字符串。

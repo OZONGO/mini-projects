@@ -1,4 +1,5 @@
-"""MP1 · 学习周报生成器 —— 聚合段测试（v0.3 步骤 6）
+#test_aggregate.py
+"""MP1 · 学习周报生成器 —— 聚合段测试（v0.1 步骤 4.6）
 
 ## DoD：本文件守住 build_report 的哪几条契约
 1. total_hours == 各行 hours 之和（手算的和写进预测注释）。
