@@ -1,4 +1,4 @@
-#render.py
+# render.py
 """MP1 · 学习周报生成器 —— 渲染段（v0.1 步骤 4）
 
 ## DoD
@@ -8,9 +8,12 @@
 - 数字一律 :.1f。
 - 坏行清单、TD-1 ⚠ 文案在本段展示；
   事实来自 report["problems"] / report["td1_bias"]。
-- 本文件是全链路唯一 CLI 入口：parse → build_report → render_markdown → print。
-  aggregate.py 不再放 __main__，避免串联代码和硬编码路径重复两份。
-  改路径只改本文件一处。
+- 本文件是纯渲染库，无 CLI 入口；全链路唯一入口在 generator.py。
+  generator.py 负责 parse → 过滤 → build_report → render_markdown → print/JSON。
+  改路径只改 generator.py 一处。
+- 口径标注（如“按全量统计”）由上层加，render 不替上层编事：
+  render 只从 report 六键读事实，无从得知是否按 --week 过滤。
+  这与 td1_bias 做成 aggregate 给的布尔开关同理。
 
 ## 预测注释
 - 输出是完整 markdown：
@@ -20,12 +23,6 @@
   - 按类别表格：先 ⚠ TD-1 警示，再按时长降序
 - 所有 hours 显示为 X.Xh；不写死具体数字。
 """
-
-
-# --- CLI 入口用的路径：全工程只此一处 -----------------------------------
-# 相对路径从【当前工作目录】起算，必须在这个目录里跑：
-#   cd mini-projects/mp1-weekly-report && python render.py
-SESSIONS_PATH = "../../learning-log/sessions.md"
 
 
 def render_markdown(report):
@@ -67,21 +64,3 @@ def render_markdown(report):
         lines.append(f"| {category} | {hours:.1f}h |")
 
     return "\n".join(lines).rstrip() + "\n"
-
-
-def main():
-    """全链路唯一入口。写文件/打印的活归这里，不归 render_markdown。"""
-    from parse_sessions import parse_sessions
-    from aggregate import build_report
-
-    rows, problems = parse_sessions(SESSIONS_PATH)
-    report = build_report(rows, problems)
-    md = render_markdown(report)
-    print(md)
-
-    # 若将来要写进 learning-log/weeks/，也只写在这一个 main() 里。
-    # render_markdown 永远不碰文件。
-
-
-if __name__ == "__main__":
-    main()

@@ -1,4 +1,4 @@
-#aggregate.py
+# aggregate.py
 """MP1 · 学习周报生成器 —— 聚合段（v0.1 步骤 3）
 
 ## DoD（先写验收条件，再写代码）
@@ -10,25 +10,24 @@
       "record_count": int,
       "week_items": list[tuple[str, float]],      # 已按 week_no 数字升序：W0→W28
       "category_items": list[tuple[str, float]],  # 已按 hours 降序，同分保持稳定
-      "problems": list[dict],                     # 原样带 lineno/reason
+      "problems": list[dict],                     # 原样带 lineno/line/reason
       "td1_bias": bool,                           # True=存在 TD-1 口径偏差这一事实
     }
 - 坏行不沉默：problems 原样交 render 展示，aggregate 不打印。
 - 周序用 week_no 数字尺子，不信字典序（W10 不能排在 W2 前）。
 - 浮点报表数字由 render 用 :.1f 收口；aggregate 不拼文案。
 - 聚合只读不改：不动 sessions.md，不动解析结果。
-- 本模块是库，不是入口：全链路 CLI 唯一入口在 render.py。
+- 本模块是库，不是入口：全链路 CLI 唯一入口在 generator.py。
   这样串联代码与硬编码路径只存在一份，改路径/改链路只改一处。
 
 ## 预测注释
 - render_markdown(report) 最终 md 形状：
   - 标题、合计：合计: X.Xh ／ N 条记录
-  - 坏行有则出现在前部，无则省略
+  - 坏行有则出现在前部，无则省略；坏行按全量统计，不随 --week 过滤
   - 按周合计：W0, W1, W2, ... W10 在 W2 后；每行 X.Xh
   - 按类别合计：⚠ TD-1 事实说明；类别按 hours 降序；每行 X.Xh
 - 数字以运行时 sessions.md 为准，不写死。
 """
-
 
 
 # --- TD-1 口径偏差事实开关 ---------------------------------------------
@@ -87,8 +86,9 @@ def build_report(rows, problems):
     }
 
 
-# 本文件不提供 __main__：全链路入口只在 render.py。
+# 本文件不提供 __main__：全链路入口只在 generator.py。
 # 如果要在开发时快速看聚合中间结果，用：
 #   python -c "from parse_sessions import parse_sessions; \
 #              from aggregate import build_report; \
-#              print(build_report(*parse_sessions('../../learning-log/sessions.md')))"
+#              rows, problems = parse_sessions('请传入路径'); \
+#              print(build_report(rows, problems))"

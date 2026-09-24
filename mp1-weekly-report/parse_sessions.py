@@ -1,7 +1,8 @@
-#parse_sessions.py
+# parse_sessions.py
 """MP1 · 学习周报生成器 —— 解析段（v0.1 步骤 2 ＋ 契约 v2）
 
-> 测试：同目录 `test_parse_sessions.py`（`python test_parse_sessions.py`，23 个用例）。
+> 测试：同目录 `test_parse_sessions.py`（跑法见 README「怎么用」，一条命令跑全部测试）。
+> 用例数不写在这里——写死数字＝把会变的数据塞进本应不变的陈述，2026-09-11 那条「验收标准会腐烂」的同族。
 > 改本文件的任何校验规则后，先跑测试再提交——把"记得要跑"变成"跑一下就跑了"。
 
 ## DoD（先写验收条件，再写代码）
@@ -74,7 +75,6 @@
 
 import math
 
-SESSIONS_PATH = "E:/AI/workspace/L/learning-log/sessions.md"   # 正斜杠：反斜杠里 \b \t \n 会被吃掉
 FIELDS = ("date", "week", "hours", "category", "topic")         # 契约里字段的唯一真相源
 
 # 受控词表：与 sessions.md「类别词表」段一字不差。改一处必须同时改另一处。
@@ -191,15 +191,4 @@ def parse_sessions(path):
     return rows, problems
 
 
-if __name__ == "__main__":
-    sessions, problems = parse_sessions(SESSIONS_PATH)
-
-    print(f"解析成功 {len(sessions)} 条，坏行 {len(problems)} 条")
-    for s in sessions:
-        print("  ", s)
-
-    if sessions:                            # 空表时 sessions[0] 会 IndexError
-        print("hours 的类型：", type(sessions[0]["hours"]))
-
-    for p in problems:
-        print(f"坏行 第{p['lineno']}行：{p['reason']}  ->  {p['line']}")
+# 本模块是纯库：不提供 CLI 入口，路径由调用方传入。
