@@ -1,0 +1,26 @@
+{
+  "task": "生成 W2 学习周报的 JSON 数据文件 week_report.json",
+  "contract_ref": "generator.py 的 JSON 导出形状（_asdict() 逐行 + ensure_ascii=False）",
+  "features": [
+    {
+      "id": "D1a",
+      "name": "形状：顶层为 JSON object",
+      "description": "产物顶层是 object（dict），不是 list。"
+    },
+    {
+      "id": "D1b",
+      "name": "形状：week_items / category_items 为 list[object]",
+      "description": "两个数组的每一项都是对象（{week, hours} / {category, hours}），不是裸二元组数组。"
+    },
+    {
+      "id": "D2",
+      "name": "编码：中文以 UTF-8 原文在场",
+      "description": "产物原始字节含 \"语法\" 的 UTF-8 原文；不含 \\u8bed 形式转义。"
+    },
+    {
+      "id": "D3",
+      "name": "范围：仅 W2",
+      "description": "week_items 仅含 W2 一行；任务要求的是 W2 周报，非全量。"
+    }
+  ]
+}
