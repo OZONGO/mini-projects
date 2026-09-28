@@ -1,3 +1,7 @@
+#test_parse_sessions.py
+
+
+
 """MP1 · 解析段单元测试 —— 把手工探针固化成一条命令自动跑
 
 ## 这个文件存在的原因
@@ -222,6 +226,71 @@ class TestHours(unittest.TestCase):
         """0 是合法时长——非负数含 0，`<0` 而非 `<=0` 才是对的。"""
         rows, problems = parse_text("2026-09-10 | W1 | 0 | 复习 | 主题")
         self.assertEqual(len(rows), 1, f"0 应当合法，实际问题：{problems}")
+
+
+class TestDate(unittest.TestCase):
+    """第三关之四（2026-09-28 新增）：日期拆两关。
+
+    关卡一（形状）自己判：长度、分隔符位置、ASCII 数字。关卡二（日历）
+    交给 `date.fromisoformat`。为什么形状不能交给库——见 parse_sessions
+    模块 DoD 设计决定四。
+    """
+
+    def test_非法日历日_13月被拒(self):
+        """形状过、日历拒——关卡二真在办事的第一枪。"""
+        _, problems = parse_text("2026-13-99 | W1 | 0.5 | 复习 | 坏日历日")
+        self.assertEqual(len(problems), 1)
+        self.assertIn("不是合法日历日", problems[0]["reason"])
+
+    def test_非法日历日_2月30日被拒(self):
+        """2 月 30 日：形状过，日历拒。"""
+        _, problems = parse_text("2026-02-30 | W1 | 0.5 | 复习 | 坏日历日")
+        self.assertIn("不是合法日历日", problems[0]["reason"])
+
+    def test_basic格式被拒(self):
+        """`20261129` 是合法日期，但不是本契约的合法字面——长度关先拦。"""
+        _, problems = parse_text("20261129 | W1 | 0.5 | 复习 | basic 格式")
+        self.assertIn("长度", problems[0]["reason"])
+        self.assertNotIn("不是合法日历日", problems[0]["reason"])
+
+    def test_ISO周日期被拒(self):
+        """`2026-W48-3` 是合法日期，但字面不合契约——分隔符位置先拦。"""
+        _, problems = parse_text("2026-W48-3 | W1 | 0.5 | 复习 | ISO 周日期")
+        self.assertIn("分隔符", problems[0]["reason"])
+        self.assertNotIn("不是合法日历日", problems[0]["reason"])
+
+    def test_不补零被拒(self):
+        """`2026-1-1` 是合法日期，但字面不合契约——长度关先拦。"""
+        _, problems = parse_text("2026-1-1 | W1 | 0.5 | 复习 | 不补零")
+        self.assertIn("长度", problems[0]["reason"])
+        self.assertNotIn("不是合法日历日", problems[0]["reason"])
+
+    def test_全角年份被拒(self):
+        """全角 `２` —— isdigit() 为 True、int() 能转，但字面不合契约。
+        形状关用 isascii() 挡下，不交给库去归一化——这是 N008 第⑥条
+        「误放方向」的反向用法。"""
+        _, problems = parse_text("20\uff126-09-28 | W1 | 0.5 | 复习 | 全角年份")
+        self.assertIn("ASCII", problems[0]["reason"])
+
+    def test_正常日期放行(self):
+        """只测"哪些被拒"的测试是不完整的——正常行必须过。"""
+        rows, problems = parse_text("2026-09-10 | W1 | 0.5 | 复习 | 正常日期")
+        self.assertEqual(len(rows), 1, f"正常日期应放行，实际问题：{problems}")
+        self.assertEqual(problems, [])
+        self.assertEqual(rows[0]["date"], "2026-09-10")
+
+    def test_多违规行_date排第一_先报date(self):
+        """顺序探针：date 与 week 同时违规时，reason 只报第一条命中。
+
+        date 按 FIELDS 契约顺序放在 value_error 第一位，所以先报 date。
+        如果哪天有人把 date 挪到 week 后面，这条会立刻变红——
+        与 test_空类别报的是空而不是不在词表 同一个形状（assertIn +
+        assertNotIn 双向钉"第一条命中是谁"）。
+        """
+        _, problems = parse_text("2026-13-99 | W99 | 0.5 | 复习 | 多违规靶")
+        self.assertEqual(len(problems), 1)
+        self.assertIn("不是合法日历日", problems[0]["reason"])
+        self.assertNotIn("越界", problems[0]["reason"])
 
 
 class TestMixedFile(unittest.TestCase):

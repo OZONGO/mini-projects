@@ -61,5 +61,5 @@ py -3.13 generator.py --week W99; echo $LASTEXITCODE   # 2，报错走 stderr
 | `hours` 字段 | 吃 Unicode 数字与下划线字面（`float("１２３")`、`float("1_0")`） | **未触发**（v1.0 只累加、不比较）。参与比较或排序尺子前处理 |
 | md 与 JSON 的同一字段**数字面不一致** | md 经 `:.1f` 收口出 `14.9h`，JSON 直出原值 `14.899999999999999`（浮点累加噪声）。两份产物对不上眼 | **已裁决（2026-09-24，本人）**：JSON 属事实层，**原样输出、对账以 JSON 为准**；md 的数字是展示层舍入，不作对账依据 |
 | `generator.py` → `week_error` | CLI 的 `--week` 值域复用 `parse_sessions.week_error`——**单一真相源、零复制**（v1.0 有意为之）。代价：`week_error` 事实上升级为公共 API，CLI 合法集与 parse 合法集绑死，改 `WEEK_MAX` 两处同变 | 契约 v3 把词表／上界从 `sessions.md` 读出来时，两处一起解绑 |
-| `category` 语义 | 与「学习时长」口径错位——教练劳动产出"文档"但不计入时长，按类别求和天然偏高 | **已裁决（2026-09-12，方案 a）**：事实由 `aggregate.py` 的 `TD1_BIAS_ACTIVE` 常量提供，⚠ 文案在 `render.py`；`actor` 字段留契约 v3（详见 `parse_sessions.py` 末尾技术债条目）。**v3 修好后把 `TD1_BIAS_ACTIVE` 改成 False，只改这一行** |
+| `category` 语义 | 与「学习时长」口径错位——教练劳动产出"文档"但不计入时长，按类别求和天然偏高 | **已裁决（2026-09-12，方案 a）**：事实由 `aggregate.py` 的 `TD1_BIAS_ACTIVE` 常量提供，⚠ 文案在 `render.py`；`actor` 字段留契约 v3（完整论证见 `aggregate.py` 模块 docstring 的「TD-1 口径偏差」段——病根／现场证据／修法／使用约束四条都在那里）。**v3 修好后把 `TD1_BIAS_ACTIVE` 改成 False，只改这一行** |
 
