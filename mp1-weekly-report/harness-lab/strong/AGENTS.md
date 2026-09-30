@@ -30,3 +30,25 @@
 - 数字面对账以 JSON 为准（float 原样）；不拿 14.9 比 14.899999999999999。
 
 ## 验证命令（一键反馈，退出码说话）
+
+在 `mini-projects/mp1-weekly-report/` 下执行；每条命令的退出码即判据。
+
+```bash
+cd mini-projects/mp1-weekly-report
+
+# 1. 测试：53 例，期望退出码 0
+py -3.13 -m unittest discover
+
+# 2. 周报渲染：W2 markdown 走 stdout，期望退出码 0
+py -3.13 generator.py --week W2
+
+# 3. JSON 导出：只走 stdout，重定向到本任务指定产物，期望退出码 0
+py -3.13 generator.py --week W2 --json > harness-lab/week_report.json
+
+# 4. JSON 契约校验：判据唯一真相源 = harness-lab/strong/check.py（四刀断言＋主线套件体检），不在 AGENTS.md 复制断言；失败即非 0
+py -3.13 harness-lab/strong/check.py
+
+# 5. 错误路径：非法周次应非 0（README 示例为 2），报错走 stderr
+py -3.13 generator.py --week W99 >/dev/null 2>/dev/null
+test $? -eq 2
+```

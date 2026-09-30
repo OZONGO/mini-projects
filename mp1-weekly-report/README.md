@@ -47,7 +47,7 @@ py -3.13 generator.py --week W2                # 只统计 W2（合计与表格�
 py -3.13 generator.py --week W2 --json         # JSON 走 stdout
 py -3.13 generator.py --sessions <路径> --week W2   # 喂夹具，不碰真数据
 
-py -3.13 -m unittest discover                  # 45 例，改任何校验/口径/排版契约后跑
+py -3.13 -m unittest discover                  # 53 例，改任何校验/口径/排版契约后跑
 py -3.13 generator.py --week W99; echo $LASTEXITCODE   # 2，报错走 stderr
 ```
 
@@ -62,4 +62,5 @@ py -3.13 generator.py --week W99; echo $LASTEXITCODE   # 2，报错走 stderr
 | md 与 JSON 的同一字段**数字面不一致** | md 经 `:.1f` 收口出 `14.9h`，JSON 直出原值 `14.899999999999999`（浮点累加噪声）。两份产物对不上眼 | **已裁决（2026-09-24，本人）**：JSON 属事实层，**原样输出、对账以 JSON 为准**；md 的数字是展示层舍入，不作对账依据 |
 | `generator.py` → `week_error` | CLI 的 `--week` 值域复用 `parse_sessions.week_error`——**单一真相源、零复制**（v1.0 有意为之）。代价：`week_error` 事实上升级为公共 API，CLI 合法集与 parse 合法集绑死，改 `WEEK_MAX` 两处同变 | 契约 v3 把词表／上界从 `sessions.md` 读出来时，两处一起解绑 |
 | `category` 语义 | 与「学习时长」口径错位——教练劳动产出"文档"但不计入时长，按类别求和天然偏高 | **已裁决（2026-09-12，方案 a）**：事实由 `aggregate.py` 的 `TD1_BIAS_ACTIVE` 常量提供，⚠ 文案在 `render.py`；`actor` 字段留契约 v3（完整论证见 `aggregate.py` 模块 docstring 的「TD-1 口径偏差」段——病根／现场证据／修法／使用约束四条都在那里）。**v3 修好后把 `TD1_BIAS_ACTIVE` 改成 False，只改这一行** |
-
+| `Makefile` | 面试官问“为何不写 Makefile”。①服务需求：把“怎么跑项目”从 README／口头／记忆变成仓库内可执行入口，统一命令名。②MP1 现在没有这个需求：判据——只有一个 CLI 入口 `generator.py`，README「怎么用」已列全命令；命令数量少，未出现跨项目／跨人／跨 agent 反复调用到需要统一入口；新增 make 等于新增工具依赖，Windows 无自带 make，本机 Git Bash／PowerShell 实测无，收益不抵代价。③触发条件：当同一组验证／生成命令被多个项目、多人或 agent 反复调用，或命令组合多到 README 开始漏项，且团队愿意承担安装 make 的依赖时，补 `Makefile`，并加 `.PHONY: check report`。 | **不补（已裁决）**：无需求，不新增工具依赖；触发条件出现再补，不按遗忘算 |
+| `requirements.txt` | 面试官问“为何不用 requirements.txt”。①服务需求：记录第三方依赖并钉死版本，让换机器／换人可复现。②MP1 现在没有这个需求：判据——零第三方依赖，只用标准库；无依赖可钉，lockfile 不提供额外可复现性，与既有 lockfile 裁决同口径。③触发条件：一旦任何非标准库 import 进入项目，先用 venv 隔离，再 `pip freeze > requirements.txt` 钉版本；空文件不算，不能为过审计造实物。 | **不补（已裁决）**：零第三方依赖，与 lockfile 口径一致；触发条件出现再补 |
