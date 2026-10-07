@@ -75,7 +75,7 @@ class Test聚合段契约(unittest.TestCase):
         ]
         problems = [
             {"lineno": 99, "line": "坏行1", "reason": "切出 3 段，应为 5 段"},
-            {"lineno": 100, "line": "坏行2", "reason": "hours 不是数字"},
+            {"lineno": 100, "line": "坏行2", "reason": "时长字面不合契约：'1_0'"},
         ]
         # 预测：record_count == 3，坏行不计入
         report = build_report(rows, problems)
@@ -118,7 +118,7 @@ class Test聚合段契约(unittest.TestCase):
     def test_problems原样传递(self):
         problems_in = [
             {"lineno": 12, "line": "坏行甲", "reason": "列数不对"},
-            {"lineno": 27, "line": "坏行乙", "reason": "hours 不是数字"},
+            {"lineno": 27, "line": "坏行乙", "reason": "时长字面不合契约：'1_0'"},
         ]
         # 预测：problems 一字不差传回，连 line 都在
         report = build_report([], problems_in)

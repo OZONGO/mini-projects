@@ -62,7 +62,7 @@ class Test渲染段契约(unittest.TestCase):
     def test_坏行非空_是二级标题_且行号与reason原文出现(self):
         report = make_report(problems=[
             {"lineno": 12, "reason": "列数不对"},
-            {"lineno": 27, "reason": "hours 不是数字"},
+            {"lineno": 27, "reason": "时长字面不合契约：'1_0'"},
         ])
         md = render_markdown(report)
 
@@ -70,9 +70,9 @@ class Test渲染段契约(unittest.TestCase):
         # （只卡“它是二级标题”这一件事；整句文案归下面那条专门的测试守）
         self.assertIn("## 坏行", md)
 
-        # 预测：逐条出现 “第 12 行：列数不对”“第 27 行：hours 不是数字”
+        # 预测：逐条出现 “第 12 行：列数不对”“第 27 行：时长字面不合契约：'1_0'”
         self.assertIn("第 12 行：列数不对", md)
-        self.assertIn("第 27 行：hours 不是数字", md)
+        self.assertIn("第 27 行：时长字面不合契约：'1_0'", md)
 
     def test_坏行标题的当前文案(self):
         """这条锁的是“当前措辞”，不是契约。
